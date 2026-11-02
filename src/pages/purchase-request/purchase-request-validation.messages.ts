@@ -1,0 +1,38 @@
+/**
+ * Validation messages from use-purchase-request.ts (ValidationEngineSchema).
+ */
+export const PR_VALIDATION_MESSAGES = {
+  companyRequired: 'Select valid Company.',
+  divisionRequired: 'Select valid Division.',
+  docTypeRequired: 'Select valid Doc. Type.',
+  docDateRequired: 'Select valid PR Date.',
+  docNoRequired: 'Enter PR No.',
+  docStatusRequired: 'Select valid Doc. Status.',
+  departmentRequired: 'Select valid Department.',
+  expenditureTypeRequired: 'Select valid Expenditure Type.',
+  erpSerialNoRequired: 'Select valid ERP Serial No.',
+  emailInvalid: 'Enter a valid Email.',
+  contactNoInvalid: 'Enter a valid Contact No.',
+  refDateGreater: 'Ref. Date cannot be greater than PR Date.',
+  refDateEmptyWithRefNo: 'Ref. Date cannot be empty as Ref. No. is provided.',
+  atLeastOneItem: 'Atleast one item is required in item detail.',
+  itemNameRequired: 'Enter Item Name.',
+  duplicateItemCombination: 'Duplicate Item with same make, cost center not allowed.',
+  reqQtyRequired: 'Enter Req. Qty.',
+  prQtyRequired: 'Enter Pur. Req. Qty.',
+  rateRequired: 'Enter Rate.',
+  scheduleDateRequired: 'Select Schedule Date.',
+  priorityRequired: 'Select Priority.',
+  makeRequired: 'Select Make.',
+  costCenterRequired: 'Select Cost Center.',
+  techSpecRequired: 'Enter Technical Specification.',
+  personNameRequired: 'Enter Person Name.',
+  personEmailRequired: 'Enter Email.',
+  duplicateEmail: 'Duplicate Email is not allowed.',
+  workflowMandatory: 'Authorization Group is required as Approval Process is Mandatory.',
+  qtyCannotIncrease: (itemName: string, originalQty: number) =>
+    `Qty. cannot be increased for ${itemName}. Original Qty. is ${originalQty}.`,
+  reasonRequired: 'Reason is required.',
+  scheduleDateEarlierDocDate: 'Schedule Date cannot be earlier that Document Date.',
+  reqQtyCannotBeNegative: 'Required Qty. cannot be negative.',
+} as const;
