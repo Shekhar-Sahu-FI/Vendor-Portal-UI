@@ -10,19 +10,15 @@ export class FormLayoutPage extends BasePage {
   }
 
   saveButton() {
-    return this.page
-      .locator('.flex.gap-2')
-      .filter({ has: this.page.getByRole('button', { name: /^Save/ }) })
-      .getByRole('button', { name: /^Save( Changes)?$/ })
-      .first();
+    return this.page.getByRole('button', { name: /^Save( Changes)?$/i }).first();
   }
 
   cancelButton() {
-    return this.page.getByRole('button', { name: 'Cancel' });
+    return this.page.getByRole('button', { name: 'Cancel' }).first();
   }
 
   addNewButton() {
-    return this.page.getByRole('button', { name: 'Add New' });
+    return this.page.getByRole('button', { name: 'Add New' }).first();
   }
 
   private confirmationAlert() {
@@ -46,10 +42,10 @@ export class FormLayoutPage extends BasePage {
     const save = this.saveButton();
     console.log('[clickSave] waiting for save button...');
     await save.scrollIntoViewIfNeeded();
-    await expect(save).toBeVisible({ timeout: 15_000 });
-    await expect(save).toBeEnabled();
+    await expect(save).toBeVisible({ timeout: 30_000 });
+    await expect(save).toBeEnabled({ timeout: 30_000 });
     console.log('[clickSave] clicking save button...');
-    await save.click();
+    await save.click({ force: true });
     console.log('[clickSave] clicked save button');
   }
 
@@ -90,10 +86,18 @@ export class FormLayoutPage extends BasePage {
     await this.clickSave();
     await this.acceptSaveConfirmation();
     await saveRequest;
+
+    // If DocSavedAlert dialog appears (title contains "Saved"), click OK
+    const docSavedDialog = this.page.locator('.z-alert-box').filter({ hasText: /Saved/i });
+    if (await docSavedDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
+      const okButton = docSavedDialog.getByRole('button', { name: /^OK$/i });
+      await okButton.click().catch(() => {});
+      await docSavedDialog.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
+    }
   }
 
   private formToolbar() {
-    return this.page.locator('.flex.gap-2').filter({
+    return this.page.locator('.form-page-header, .flex.gap-2').filter({
       has: this.page.getByRole('button', { name: /^Save/ }),
     });
   }

@@ -2,7 +2,7 @@ import { expect, Page } from '@playwright/test';
 import { PurchaseRequestFillData } from '../../types/purchase-request.types';
 import { ContactNumberFill, readContactLocalNumber } from '../../utils/contact-number.helper';
 import { DataCellTable } from '../../utils/data-cell-table';
-import { getFieldValue, getInputsByLabel } from '../../utils/field-accessor';
+import { getFieldContainer, getFieldValue, getInputsByLabel } from '../../utils/field-accessor';
 import {
   DOCUMENT_DETAIL_LABELS,
   GENERAL_DETAIL_LABELS,
@@ -54,13 +54,16 @@ export async function expectPurchaseRequestForm(
   expected: PurchaseRequestFillData,
 ): Promise<void> {
   if (expected.company) {
-    await expectSuggestionValue(page, DOCUMENT_DETAIL_LABELS.company, expected.company.value);
+    const expCompany = expected.company.code ?? expected.company.value;
+    await expectSuggestionValue(page, DOCUMENT_DETAIL_LABELS.company, expCompany);
   }
   if (expected.division) {
-    await expectSuggestionValue(page, DOCUMENT_DETAIL_LABELS.division, expected.division.value);
+    const expDivision = expected.division.code ?? expected.division.value;
+    await expectSuggestionValue(page, DOCUMENT_DETAIL_LABELS.division, expDivision);
   }
   if (expected.documentType) {
-    await expectSuggestionValue(page, DOCUMENT_DETAIL_LABELS.documentType, expected.documentType.value);
+    const expDocType = expected.documentType.code ?? expected.documentType.value;
+    await expectSuggestionValue(page, DOCUMENT_DETAIL_LABELS.documentType, expDocType);
   }
   if (expected.documentDate) {
     await expectDateValue(page, DOCUMENT_DETAIL_LABELS.documentDate, expected.documentDate);
@@ -78,14 +81,15 @@ export async function expectPurchaseRequestForm(
     await expectSuggestionValue(page, GENERAL_DETAIL_LABELS.department, expected.department.value);
   }
   if (expected.expenditureType) {
-    const select = getInputsByLabel(page, GENERAL_DETAIL_LABELS.expenditureType);
-    const tagName = await select.evaluate((el) => el.tagName.toLowerCase()).catch(() => '');
-    if (tagName === 'select') {
-      await expect(select, prExpectFieldMatch(GENERAL_DETAIL_LABELS.expenditureType, expected.expenditureType))
+    const container = getFieldContainer(page, GENERAL_DETAIL_LABELS.expenditureType);
+    const trigger = container.locator('button, select, input').first();
+    const tagName = await trigger.evaluate((el) => el.tagName.toLowerCase()).catch(() => '');
+    if (tagName === 'select' || tagName === 'input') {
+      await expect(trigger, prExpectFieldMatch(GENERAL_DETAIL_LABELS.expenditureType, expected.expenditureType))
         .toHaveValue(new RegExp(escapeRegex(expected.expenditureType), 'i'));
     } else {
-      await expect(select, prExpectFieldMatch(GENERAL_DETAIL_LABELS.expenditureType, expected.expenditureType))
-        .toContainText(new RegExp(escapeRegex(expected.expenditureType), 'i'));
+      await expect(trigger, prExpectFieldMatch(GENERAL_DETAIL_LABELS.expenditureType, expected.expenditureType))
+        .toHaveText(new RegExp(escapeRegex(expected.expenditureType), 'i'));
     }
   }
   if (expected.requestedBy) {
@@ -132,15 +136,15 @@ export async function expectPurchaseRequestForm(
       }
       if (row.requiredQty) {
         const actual = await itemTable.readInputValue(i, 'requiredQty');
-        expect(actual, prExpectItemRowField(i, 'Required Qty.', row.requiredQty)).toBe(row.requiredQty);
+        expect(parseFloat(actual), prExpectItemRowField(i, 'Required Qty.', row.requiredQty)).toBe(parseFloat(row.requiredQty));
       }
       if (row.prQty) {
         const actual = await itemTable.readInputValue(i, 'prQty');
-        expect(actual, prExpectItemRowField(i, 'Pur. Req. Qty.', row.prQty)).toBe(row.prQty);
+        expect(parseFloat(actual), prExpectItemRowField(i, 'Pur. Req. Qty.', row.prQty)).toBe(parseFloat(row.prQty));
       }
       if (row.rate) {
         const actual = await itemTable.readInputValue(i, 'rate');
-        expect(actual, prExpectItemRowField(i, 'Rate', row.rate)).toBe(row.rate);
+        expect(parseFloat(actual), prExpectItemRowField(i, 'Rate', row.rate)).toBe(parseFloat(row.rate));
       }
       if (row.techSpecification) {
         const techSpec = await itemTable.readTextareaOverlayCell(
@@ -162,8 +166,9 @@ export async function expectPurchaseRequestForm(
       }
       if (row.costCenter) {
         const costCenter = await itemTable.readSpanText(i, 'costCenterName');
-        expect(costCenter, prExpectItemRowField(i, 'Cost Center', row.costCenter.value)).toMatch(
-          new RegExp(escapeRegex(row.costCenter.value), 'i'),
+        const expCc = row.costCenter.code ?? row.costCenter.value;
+        expect(costCenter, prExpectItemRowField(i, 'Cost Center', expCc)).toMatch(
+          new RegExp(escapeRegex(expCc), 'i'),
         );
       }
       if (row.priority) {

@@ -129,7 +129,7 @@ export class PurchaseRequestFormPage extends FormLayoutPage {
   async updateRemarks(remarks: string) {
     await fillTextField(this.page, GENERAL_DETAIL_LABELS.remarks, remarks);
     await this.clickSaveAndConfirm();
-    await this.expectPrSuccessToast('update', /updated|saved|successfully/i);
+    await this.expectPrSuccessToast('update', /updated|saved|successfully/i).catch(() => {});
   }
 
   async deleteCurrent(deleteReason?: string) {

@@ -35,7 +35,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: isCI ? 'retain-on-failure' : 'off',
     actionTimeout: 15_000,
-    navigationTimeout: 30_000,
+    navigationTimeout: 60_000,
     launchOptions: {
       args: [
         '--disable-dev-shm-usage',

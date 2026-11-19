@@ -54,6 +54,7 @@ export class PurchaseRequestGeneralDetailSection {
     if (this.hasValue(data.referenceNo)) {
       await fillTextField(this.page, L.referenceNo, data.referenceNo);
     }
+
     if (this.hasValue(data.referenceDate)) {
       await fillDateByLabel(this.page, L.referenceDate, data.referenceDate);
     }

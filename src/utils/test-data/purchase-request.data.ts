@@ -1,37 +1,38 @@
 import { PurchaseRequestFillData } from '../../types/purchase-request.types';
 
-const suggest = (query: string, value: string) => ({ query, value });
+const suggest = (query: string, value: string, code?: string) => ({ query, value, code });
 
 /** Hardcoded PR used for save-then-verify-on-edit tests. */
 export function buildPurchaseRequestVerifyData(uniqueMarker: string): PurchaseRequestFillData {
   return {
-    company: suggest('bsp', 'BSP'),
-    division: suggest('Plant', 'Plant Division'),
-    documentType: suggest('Process', 'Process'),
-    documentDate: '2026-05-06',
-    department: suggest('Purchase', 'Purchase'),
-    requestedBy: suggest('sai', 'sai-ui'),
-    requestedContactNo: { countrySearch: 'India', localNumber: '9876543210' },
+    company: suggest('Company One', 'Company One', 'CONE'),
+    division: suggest('Division One', 'Division One Company One Two Three', 'DIVONE'),
+    documentType: suggest('PR - Standard', 'PR - Standard - Division One Company One Two Three', 'PST'),
+    documentDate: '2026-06-15',
+    department: suggest('Department One', 'Department One Division One Two Three'),
+    requestedBy: suggest('UN2', 'Rajesh Verma'),
+    requestedContactNo: { countrySearch: 'India', localNumber: '9876500002' },
+    requestedByEmail: 'rajesh.verma@shaktiindustrial.com',
     expenditureType: 'Capex',
-    referenceNo: `PR/BSP/PLT/PRC/${uniqueMarker}`,
-    referenceDate: '2026-04-17',
+    referenceNo: `REF-${uniqueMarker}`,
+    referenceDate: '2026-06-10',
     remarks: `PR saved data verify ${uniqueMarker}`,
     itemRows: [
       {
-        item: suggest('I-beams', 'I-beams'),
+        item: suggest('Item One', 'Item One No Multi Unit No Make'),
         requiredQty: '100',
         prQty: '100',
         rate: '1',
-        remarks: 'BEam shaping',
-        techSpecification: 'I-beams are used for construction of buildings and bridges',
+        remarks: 'Item One remarks',
+        techSpecification: 'Technical specification for Item One',
         scheduleDate: '2026-10-28',
-        priority: suggest('high', 'Very High'),
-        costCenter: suggest('Machine', 'Machine Operations'),
+        priority: suggest('Priority One', 'Priority One'),
+        costCenter: suggest('Cost Center One', 'Cost Center One', 'CCONE'),
       },
     ],
     informToRows: [
-      suggest('sai', 'sai ui'),
-      suggest('Bhargav', 'Bhargav'),
+      suggest('UN1', 'System Administrator'),
+      suggest('UN3', 'Sanjay Kulkarni'),
     ],
   };
 }

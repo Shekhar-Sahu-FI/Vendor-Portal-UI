@@ -4,6 +4,7 @@ import type { ContactNumberFill } from '../utils/contact-number.helper';
 export interface AutoSuggestField {
   query: string;
   value: string;
+  code?: string;
 }
 
 export interface PurchaseRequestItemRowData {

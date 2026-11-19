@@ -39,7 +39,12 @@ export class TextAreaOverlayHelper {
       }
     }
     await target.fill(value);
-    await this.overlay().locator('.flex.justify-end button').first().click();
+    const saveBtn = this.overlay().locator('button[type="submit"], button[aria-label="Save"]').first();
+    if (await saveBtn.isVisible().catch(() => false)) {
+      await saveBtn.click();
+    } else {
+      await this.overlay().locator('.flex.justify-end button').last().click();
+    }
     await expect(this.overlay()).toBeHidden({ timeout: 10_000 });
   }
 }

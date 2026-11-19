@@ -13,7 +13,12 @@ export abstract class BasePage {
   }
 
   async goto() {
-    await this.page.goto(`${env.baseUrl}${this.path}`, { waitUntil: 'domcontentloaded' });
+    const targetUrl = `${env.baseUrl}${this.path}`;
+    const currentUrl = this.page.url();
+    if (currentUrl.replace(/\/$/, '') === targetUrl.replace(/\/$/, '')) {
+      return;
+    }
+    await this.page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 60_000 });
   }
 
   async waitForAppReady() {

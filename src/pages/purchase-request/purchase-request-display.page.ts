@@ -16,7 +16,12 @@ export class PurchaseRequestDisplayPage extends BasePage {
   }
 
   async clickEdit() {
-    await this.page.getByRole('button', { name: 'Edit' }).click();
+    if (this.page.url().includes('/edit')) {
+      return;
+    }
+    const editBtn = this.page.getByRole('button', { name: /^Edit$/i }).first();
+    await editBtn.waitFor({ state: 'visible', timeout: 30_000 });
+    await editBtn.click({ force: true });
     await this.page.waitForURL(/\/purchase-request\/\d+\/edit/, { timeout: 30_000 });
     await this.waitForAppReady();
   }

@@ -55,12 +55,12 @@ export class GridHelper {
     const grid = this.gridRoot();
     const action = grid.locator('[data-cell-id="cell-0-actions"]').getByRole('button').first();
     if (await action.isVisible().catch(() => false)) {
-      await action.click();
+      await action.click({ force: true });
       return;
     }
     const firstRow = grid.locator('tbody tr').first();
     await expect(firstRow).toBeVisible();
-    await firstRow.click();
+    await firstRow.click({ force: true });
   }
 
   /** Finds any row containing `text` and clicks its # action button. */
@@ -70,9 +70,9 @@ export class GridHelper {
     await expect(row).toBeVisible({ timeout: 15_000 });
     const action = row.locator('[data-cell-id$="-actions"]').getByRole('button').first();
     if (await action.isVisible().catch(() => false)) {
-      await action.click();
+      await action.click({ force: true });
     } else {
-      await row.click();
+      await row.click({ force: true });
     }
   }
 
@@ -84,40 +84,44 @@ export class GridHelper {
   }
 
   /**
-   * Types into a column filter (e.g. `Filter Pur. Req. No....`) and waits for grid reload.
+   * Types into a column filter (e.g. `Filter Pur. Req. No....`).
    */
   async filterByColumnPlaceholder(
     placeholder: string,
     value: string,
-    options?: { listUrlPattern?: RegExp },
   ): Promise<void> {
     await this.waitForLoaded();
     const filter = this.gridRoot().getByPlaceholder(placeholder, { exact: true });
     await expect(filter).toBeVisible({ timeout: 15_000 });
 
-    const listPattern = options?.listUrlPattern ?? /purchase-request|purchase-order|request-for-quotation/i;
-    const reload = this.page
-      .waitForResponse(
-        (response) =>
-          listPattern.test(response.url())
-          && response.request().method() === 'GET'
-          && response.ok(),
-        { timeout: 30_000 },
-      )
-      .catch(() => null);
-
+    await filter.focus();
     await filter.fill('');
     await filter.fill(value);
-    await reload;
-    await expect(this.gridRoot().locator('tbody tr').first()).toBeVisible({ timeout: 30_000 });
+    await this.page.waitForTimeout(300);
   }
 
   /**
-   * Filter by column placeholder, then open the first row via the # action button.
+   * Filter by column placeholder, then open the matching row via the # action button.
    */
   async filterAndOpenFirstRow(filterPlaceholder: string, value: string): Promise<void> {
+    const alertBox = this.page.locator('.z-alert-box');
+    if (await alertBox.isVisible({ timeout: 1000 }).catch(() => false)) {
+      const okBtn = alertBox.getByRole('button', { name: /^OK$/i });
+      if (await okBtn.isVisible().catch(() => false)) {
+        await okBtn.click().catch(() => {});
+        await alertBox.waitFor({ state: 'hidden', timeout: 3000 }).catch(() => {});
+      }
+    }
+
     await this.filterByColumnPlaceholder(filterPlaceholder, value);
-    await this.openFirstRow();
+    const matchingRow = this.gridRoot().locator('tbody tr').filter({ hasText: value }).first();
+    await expect(matchingRow).toBeVisible({ timeout: 15_000 });
+    const action = matchingRow.locator('[data-cell-id$="-actions"]').getByRole('button').first();
+    if (await action.isVisible().catch(() => false)) {
+      await action.click({ force: true });
+      return;
+    }
+    await matchingRow.click({ force: true });
   }
 
   /**

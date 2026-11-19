@@ -118,7 +118,18 @@ export class DataCellTable<const TCols extends Readonly<Record<string, string>>>
   }
 
   async readSpanText<K extends keyof TCols>(rowIndex: number, column: K): Promise<string> {
-    return ((await this.span(rowIndex, column).textContent()) ?? '').trim();
+    const cell = this.cell(rowIndex, column);
+    const input = this.input(rowIndex, column);
+    const inputVal = (await input.inputValue().catch(() => ''))?.trim();
+    if (inputVal) {
+      return inputVal;
+    }
+    const span = this.span(rowIndex, column);
+    const spanText = (await span.textContent().catch(() => ''))?.trim();
+    if (spanText) {
+      return spanText;
+    }
+    return ((await cell.textContent().catch(() => '')) ?? '').trim();
   }
 
   async readInputValue<K extends keyof TCols>(rowIndex: number, column: K): Promise<string> {

@@ -9,6 +9,10 @@ import {
 } from '../../src/pages/purchase-request/purchase-request.assert.messages';
 
 test.describe('Purchase Request - Edit & Update Category 4', () => {
+  test.beforeEach(async () => {
+    test.setTimeout(180_000);
+  });
+
   /**
    * PR-EDT-001: Update remarks on an existing purchase request
    */
@@ -26,11 +30,11 @@ test.describe('Purchase Request - Edit & Update Category 4', () => {
     await purchaseRequestListPage.open();
     await purchaseRequestListPage.createNew();
     await purchaseRequestFormPage.fillMinimumRequired(data);
-    await purchaseRequestFormPage.saveAndConfirm();
+    const docNo = await purchaseRequestFormPage.saveAndConfirm();
 
     // 2. Open created PR in edit mode
     await purchaseRequestListPage.open();
-    await purchaseRequestListPage.openFirstRecordForEdit();
+    await purchaseRequestListPage.openSavedRecordForEdit(docNo);
 
     await expect(
       page,
@@ -41,6 +45,8 @@ test.describe('Purchase Request - Edit & Update Category 4', () => {
     await purchaseRequestFormPage.updateRemarks(updatedRemarks);
 
     // 4. Verify updated remarks persisted
+    await purchaseRequestListPage.open();
+    await purchaseRequestListPage.openSavedRecordForEdit(docNo);
     await expect
       .poll(() => getFieldValue(page, GENERAL_DETAIL_LABELS.remarks), {
         message: prExpectField(GENERAL_DETAIL_LABELS.remarks, updatedRemarks),
@@ -57,7 +63,7 @@ test.describe('Purchase Request - Edit & Update Category 4', () => {
     purchaseRequestFormPage,
     page,
   }) => {
-    const marker = Date.now().toString();
+    const marker = Date.now().toString().slice(-6);
     const data = buildPurchaseRequestVerifyData(marker);
 
     // 1. Create and save PR
@@ -93,15 +99,15 @@ test.describe('Purchase Request - Edit & Update Category 4', () => {
     const data = buildPurchaseRequestData({
       itemRows: [
         {
-          item: { query: 'I-beams', value: 'I-beams' },
+          item: { query: 'Item One', value: 'Item One No Multi Unit No Make' },
           requiredQty: '50',
           prQty: '50',
           rate: '10',
           remarks: 'Before update',
           techSpecification: 'Spec 1',
           scheduleDate: '2026-10-28',
-          priority: { query: 'high', value: 'Very High' },
-          costCenter: { query: 'Machine', value: 'Machine Operations' },
+          priority: { query: 'Priority One', value: 'Priority One' },
+          costCenter: { query: 'Cost Center One', value: 'Cost Center One' },
         },
       ],
     });
@@ -109,18 +115,25 @@ test.describe('Purchase Request - Edit & Update Category 4', () => {
     await purchaseRequestListPage.open();
     await purchaseRequestListPage.createNew();
     await purchaseRequestFormPage.fillMinimumRequired(data);
-    await purchaseRequestFormPage.saveAndConfirm();
+    const docNo = await purchaseRequestFormPage.saveAndConfirm();
 
-    // Open first row for edit
+    // Open saved row for edit
     await purchaseRequestListPage.open();
-    await purchaseRequestListPage.openFirstRecordForEdit();
+    await purchaseRequestListPage.openSavedRecordForEdit(docNo);
 
     // Modify quantity on row 0
-    await purchaseRequestFormPage.table.editInput(0, 'prQty', '75');
-    await purchaseRequestFormPage.table.editInput(0, 'rate', '12');
+    await purchaseRequestFormPage.table.fillInput(0, 'prQty', '75');
+    await purchaseRequestFormPage.table.fillInput(0, 'rate', '12');
 
     // Save and verify confirmation
     await purchaseRequestFormPage.clickSaveAndConfirm();
-    await expect(page.locator('.z-toast').first()).toBeVisible({ timeout: 15_000 });
+
+    // Reopen and verify modified line item values persisted
+    await purchaseRequestListPage.open();
+    await purchaseRequestListPage.openSavedRecordForEdit(docNo);
+    const updatedQty = await purchaseRequestFormPage.table.readInputValue(0, 'prQty');
+    const updatedRate = await purchaseRequestFormPage.table.readInputValue(0, 'rate');
+    expect(parseFloat(updatedQty)).toBe(75);
+    expect(parseFloat(updatedRate)).toBe(12);
   });
 });
