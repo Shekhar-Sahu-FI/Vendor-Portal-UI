@@ -1,5 +1,6 @@
 import { Page } from '@playwright/test';
 import { FormLayoutPage } from '../base/form-layout.page';
+import { expectSaveNotConfirmed } from '../../utils/form-testing';
 import { PurchaseOrderFillData } from '../../types/purchase-order.types';
 import {
   GENERAL_DETAIL_LABELS,
@@ -138,6 +139,35 @@ export class PurchaseOrderFormPage extends FormLayoutPage {
       await this.dialog.confirmDelete();
     }
     await this.expectSuccessAfterSave(/deleted|successfully/i);
+  }
+
+  saveBtn() {
+    return this.page.getByRole('button', { name: /^Save$/i }).first();
+  }
+
+  cancelBtn() {
+    return this.page.getByRole('button', { name: /^Cancel$/i }).first();
+  }
+
+  moreActionsBtn() {
+    return this.page.locator('button[title="More Actions"], button[aria-label="More Actions"]').first();
+  }
+
+  deleteMenuItem() {
+    return this.page.getByText('Delete', { exact: true }).first();
+  }
+
+  async triggerSaveValidation(): Promise<void> {
+    await this.saveBtn().click();
+    await this.page
+      .locator('.text-destructive, .text-red-600, .text-red-500, .z-alert-box')
+      .first()
+      .waitFor({ state: 'visible', timeout: 5_000 })
+      .catch(() => {});
+  }
+
+  async expectSaveBlockedByValidation(): Promise<void> {
+    await expectSaveNotConfirmed(this.page);
   }
 
   getDocumentIdFromUrl(): number | null {

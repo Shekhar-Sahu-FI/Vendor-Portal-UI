@@ -77,6 +77,9 @@ import {
   TermsAndConditionsHeadMasterFormPage,
   VendorAttachmentMasterListPage,
   VendorAttachmentMasterFormPage,
+  ComparativeStatementListPage,
+  ComparativeStatementFormPage,
+  ComparativeStatementDisplayPage,
 } from '../pages';
 
 type AppFixtures = {
@@ -157,6 +160,12 @@ type AppFixtures = {
   termsAndConditionsHeadMasterFormPage: TermsAndConditionsHeadMasterFormPage;
   vendorAttachmentMasterListPage: VendorAttachmentMasterListPage;
   vendorAttachmentMasterFormPage: VendorAttachmentMasterFormPage;
+  quotationListPage: QuotationListPage;
+  quotationFormPage: QuotationFormPage;
+  quotationDisplayPage: QuotationDisplayPage;
+  comparativeStatementListPage: ComparativeStatementListPage;
+  comparativeStatementFormPage: ComparativeStatementFormPage;
+  comparativeStatementDisplayPage: ComparativeStatementDisplayPage;
 };
 
 export const test = base.extend<AppFixtures>({
@@ -390,6 +399,24 @@ export const test = base.extend<AppFixtures>({
   },
   vendorAttachmentMasterFormPage: async ({ page }, use) => {
     await use(new VendorAttachmentMasterFormPage(page));
+  },
+  quotationListPage: async ({ page }, use) => {
+    await use(new QuotationListPage(page));
+  },
+  quotationFormPage: async ({ page }, use) => {
+    await use(new QuotationFormPage(page));
+  },
+  quotationDisplayPage: async ({ page }, use) => {
+    await use(new QuotationDisplayPage(page));
+  },
+  comparativeStatementListPage: async ({ page }, use) => {
+    await use(new ComparativeStatementListPage(page));
+  },
+  comparativeStatementFormPage: async ({ page }, use) => {
+    await use(new ComparativeStatementFormPage(page));
+  },
+  comparativeStatementDisplayPage: async ({ page }, use) => {
+    await use(new ComparativeStatementDisplayPage(page));
   },
 });
 
