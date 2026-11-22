@@ -21,10 +21,10 @@ export const DOCUMENT_DETAIL_LABELS = {
   sectionTitle: 'Document Detail',
   company: 'Company',
   division: 'Division',
-  documentType: 'Document Type',
-  documentDate: 'Document Date',
-  documentNo: 'Document No.',
-  documentStatus: 'Document Status',
+  documentType: 'Doc. Type',
+  documentDate: 'RFQ Date',
+  documentNo: 'RFQ No.',
+  documentStatus: 'Doc. Status',
 } as const;
 
 export const GENERAL_DETAIL_LABELS = {

@@ -159,16 +159,19 @@ export async function fillDateByLabel(
 ): Promise<void> {
   const calendar = getCalendarLocator(page, calendarContainer);
 
-  const isAlreadyOpen = await calendar.isVisible().catch(() => false);
-  if (!isAlreadyOpen) {
-    const pickerButton = getDatePickerButton(page, labelText);
-    await pickerButton.scrollIntoViewIfNeeded();
-    await expect(pickerButton).toBeVisible({ timeout: 10_000 });
+  // If a calendar is already open from a previous interaction, close it first
+  if (await calendar.isVisible().catch(() => false)) {
+    await page.keyboard.press('Escape');
+    await calendar.waitFor({ state: 'hidden', timeout: 2_000 }).catch(() => {});
+  }
+
+  const pickerButton = getDatePickerButton(page, labelText);
+  await pickerButton.scrollIntoViewIfNeeded();
+  await expect(pickerButton).toBeVisible({ timeout: 10_000 });
+  await pickerButton.click();
+  const opened = await calendar.isVisible({ timeout: 1_500 }).catch(() => false);
+  if (!opened) {
     await pickerButton.click();
-    const opened = await calendar.isVisible({ timeout: 1_500 }).catch(() => false);
-    if (!opened) {
-      await pickerButton.click();
-    }
   }
 
   await selectDateFromCalendar(page, targetDate, calendarContainer);

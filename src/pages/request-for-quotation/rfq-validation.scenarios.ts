@@ -38,8 +38,9 @@ export function buildRfqValidationScenarios(form: RequestForQuotationFormPage): 
     {
       name: 'due date before document date',
       setup: async ({ page }) => {
-        await fillDateByLabel(page, DOCUMENT_DETAIL_LABELS.documentDate, '2026-06-15');
+        await fillDateByLabel(page, DOCUMENT_DETAIL_LABELS.documentDate, '2026-05-01');
         await fillDateByLabel(page, GENERAL_DETAIL_LABELS.dueDate, '2026-06-01');
+        await fillDateByLabel(page, DOCUMENT_DETAIL_LABELS.documentDate, '2026-06-15');
       },
       save,
       stayOnUrl: stayOnNew,
@@ -50,7 +51,7 @@ export function buildRfqValidationScenarios(form: RequestForQuotationFormPage): 
     {
       name: 'partial item row',
       setup: async ({ page }) => {
-        await form.documentDetail.fillAll({ documentType: { query: 'RProcess', value: 'RProcess' } });
+        await form.documentDetail.fillAll({ documentType: { query: 'RFQ', value: 'RFQ' } });
         await fillDateByLabel(page, GENERAL_DETAIL_LABELS.dueDate, '2026-12-31');
         await form.itemDetail.fillRow(0, {
           item: { query: 'cold', value: 'cold rolled sheets' },
@@ -70,7 +71,7 @@ export function buildRfqValidationScenarios(form: RequestForQuotationFormPage): 
     {
       name: 'partial vendor row',
       setup: async ({ page }) => {
-        await form.documentDetail.fillAll({ documentType: { query: 'RProcess', value: 'RProcess' } });
+        await form.documentDetail.fillAll({ documentType: { query: 'RFQ', value: 'RFQ' } });
         await fillDateByLabel(page, GENERAL_DETAIL_LABELS.dueDate, '2026-12-31');
         await form.itemDetail.fillRow(0, {
           item: { query: 'cold', value: 'cold rolled sheets' },
@@ -92,7 +93,7 @@ export function buildRfqValidationScenarios(form: RequestForQuotationFormPage): 
       name: 'PR source without items',
       setup: async ({ page }) => {
         await form.fillSourceDocumentPurchaseRequest();
-        await form.documentDetail.fillAll({ documentType: { query: 'RProcess', value: 'RProcess' } });
+        await form.documentDetail.fillAll({ documentType: { query: 'RFQ', value: 'RFQ' } });
         await fillDateByLabel(page, GENERAL_DETAIL_LABELS.dueDate, '2026-12-31');
       },
       save,

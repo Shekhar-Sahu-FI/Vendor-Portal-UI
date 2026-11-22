@@ -12,7 +12,7 @@ export class LoginPage extends BasePage {
     await this.goto();
     await fillTextField(this.page, 'Username / Email / Contact No.', username);
     await fillTextField(this.page, 'Password', password);
-    await this.page.locator('form button[type="submit"]').click();
+    await this.page.locator('form button[type="submit"]').first().click();
     await this.page.waitForURL(
       /\/(company|vendor)\/(dashboard|transaction|master|security|utility)/,
       { timeout: 30_000 },

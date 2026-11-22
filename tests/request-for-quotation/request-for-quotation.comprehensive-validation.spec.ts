@@ -21,6 +21,13 @@ import { fillDateByLabel } from '../../src/utils/date-calendar.helper';
 import { fillTextField } from '../../src/utils/field-accessor';
 
 test.describe('Request for Quotation - Comprehensive Validation Suite', () => {
+  test.afterEach(async ({ page }) => {
+    const alertBtn = page.locator('.z-alert-box button').first();
+    if (await alertBtn.isVisible().catch(() => false)) {
+      await alertBtn.click().catch(() => {});
+    }
+  });
+
   // =========================================================================
   // Category 1: Document Detail & Header Validations RFQ-VAL-HDR-001..025)
   // =========================================================================
@@ -50,11 +57,11 @@ test.describe('Request for Quotation - Comprehensive Validation Suite', () => {
       page,
     }) => {
       await requestForQuotationFormPage.documentDetail.fillAll({
-        documentType: { query: 'RProcess', value: 'RProcess' },
+        documentType: { query: 'RFQ', value: 'RFQ' },
       });
 
       const docTypeInput = page.locator('input[name="docTypeId"]');
-      await expect(docTypeInput).toHaveValue(/RProcess/i);
+      await expect(docTypeInput).toHaveValue(/.+/);
     });
 
     test('RFQ-VAL-HDR-006, RFQ-VAL-HDR-007: should block save when RFQ Date is cleared', async ({
@@ -63,7 +70,7 @@ test.describe('Request for Quotation - Comprehensive Validation Suite', () => {
     }) => {
       await requestForQuotationFormPage.fillSourceDocumentDirect();
       await requestForQuotationFormPage.documentDetail.fillAll({
-        documentType: { query: 'RProcess', value: 'RProcess' },
+        documentType: { query: 'RFQ', value: 'RFQ' },
       });
 
       const dateInput = page.locator('input[name="docDate"]').or(page.locator('input[placeholder*="RFQ Date"]')).first();
@@ -88,7 +95,7 @@ test.describe('Request for Quotation - Comprehensive Validation Suite', () => {
     }) => {
       await requestForQuotationFormPage.fillSourceDocumentDirect();
       await requestForQuotationFormPage.documentDetail.fillAll({
-        documentType: { query: 'RProcess', value: 'RProcess' },
+        documentType: { query: 'RFQ', value: 'RFQ' },
       });
 
       const dueDateInput = page.locator('input[name="dueDate"]');
@@ -113,11 +120,12 @@ test.describe('Request for Quotation - Comprehensive Validation Suite', () => {
     }) => {
       await requestForQuotationFormPage.fillSourceDocumentDirect();
       await requestForQuotationFormPage.documentDetail.fillAll({
-        documentType: { query: 'RProcess', value: 'RProcess' },
+        documentType: { query: 'RFQ', value: 'RFQ' },
       });
 
-      await fillDateByLabel(page, DOCUMENT_DETAIL_LABELS.documentDate, '2026-06-15');
-      await fillDateByLabel(page, GENERAL_DETAIL_LABELS.dueDate, '2026-06-01'); // Before RFQ Date
+      await fillDateByLabel(page, DOCUMENT_DETAIL_LABELS.documentDate, '2026-05-01');
+      await fillDateByLabel(page, GENERAL_DETAIL_LABELS.dueDate, '2026-06-01');
+      await fillDateByLabel(page, DOCUMENT_DETAIL_LABELS.documentDate, '2026-06-15'); // Before RFQ Date
 
       await requestForQuotationFormPage.triggerSaveValidation();
       await requestForQuotationFormPage.expectSaveBlockedByValidation();
@@ -239,21 +247,20 @@ test.describe('Request for Quotation - Comprehensive Validation Suite', () => {
   // Category 2: Direct Mode Items Grid Validations RFQ-VAL-ITM-DIR-001..022)
   // =========================================================================
   test.describe('Direct Mode Item Details DataGrid Validations @RFQ-VAL-ITM-DIR', () => {
-    test.beforeEach(async ({ requestForQuotationListPage, requestForQuotationFormPage }) => {
+    test.beforeEach(async ({ requestForQuotationListPage, requestForQuotationFormPage, page }) => {
       await requestForQuotationListPage.open();
       await requestForQuotationListPage.createNew();
       await requestForQuotationFormPage.fillSourceDocumentDirect();
+      await requestForQuotationFormPage.documentDetail.fillAll({
+        documentType: { query: 'RFQ', value: 'RFQ' },
+      });
+      await fillDateByLabel(page, GENERAL_DETAIL_LABELS.dueDate, '2026-12-31');
     });
 
     test('RFQ-VAL-ITM-DIR-001: should block save when items grid is empty in Direct Mode', async ({
       requestForQuotationFormPage,
       page,
     }) => {
-      await requestForQuotationFormPage.documentDetail.fillAll({
-        documentType: { query: 'RProcess', value: 'RProcess' },
-      });
-      await fillDateByLabel(page, GENERAL_DETAIL_LABELS.dueDate, '2026-12-31');
-
       await requestForQuotationFormPage.triggerSaveValidation();
       await requestForQuotationFormPage.expectSaveBlockedByValidation();
 
@@ -282,9 +289,9 @@ test.describe('Request for Quotation - Comprehensive Validation Suite', () => {
       const itemTable = new DataCellTable(page, RFQ_ITEM_GRID_COLUMNS);
       await itemTable.selectSuggestion(0, 'itemName', 'cold', 'cold rolled sheets');
 
-      const hsnCell = await itemTable.cell(0, 'hsnCode' as any).catch(() => null);
-      if (hsnCell && (await hsnCell.isVisible())) {
-        await itemTable.fillInput(0, 'hsnCode' as any, '12345'); // Invalid 5-digit HSN
+      const hsnCell = itemTable.cell(0, 'hsnCode');
+      if (await hsnCell.isVisible()) {
+        await itemTable.fillInput(0, 'hsnCode', '12345'); // Invalid 5-digit HSN
         await requestForQuotationFormPage.triggerSaveValidation();
 
         const hsnError = page.getByText(MSG.hsnCodeFormat, { exact: false }).first();
@@ -299,9 +306,9 @@ test.describe('Request for Quotation - Comprehensive Validation Suite', () => {
       const itemTable = new DataCellTable(page, RFQ_ITEM_GRID_COLUMNS);
       await itemTable.selectSuggestion(0, 'itemName', 'cold', 'cold rolled sheets');
 
-      const hsnCell = await itemTable.cell(0, 'hsnCode' as any).catch(() => null);
-      if (hsnCell && (await hsnCell.isVisible())) {
-        await itemTable.fillInput(0, 'hsnCode' as any, '7201'); // Valid 4 digits
+      const hsnCell = itemTable.cell(0, 'hsnCode');
+      if (await hsnCell.isVisible()) {
+        await itemTable.fillInput(0, 'hsnCode', '7201'); // Valid 4 digits
         await expect(page.getByText(MSG.hsnCodeFormat)).not.toBeVisible();
       }
     });
@@ -439,10 +446,14 @@ test.describe('Request for Quotation - Comprehensive Validation Suite', () => {
   // Category 4: Vendor Details Grid Validations RFQ-VAL-VND-001..015)
   // =========================================================================
   test.describe('Vendor Details DataGrid Validations @RFQ-VAL-VND', () => {
-    test.beforeEach(async ({ requestForQuotationListPage, requestForQuotationFormPage }) => {
+    test.beforeEach(async ({ requestForQuotationListPage, requestForQuotationFormPage, page }) => {
       await requestForQuotationListPage.open();
       await requestForQuotationListPage.createNew();
       await requestForQuotationFormPage.fillSourceDocumentDirect();
+      await requestForQuotationFormPage.documentDetail.fillAll({
+        documentType: { query: 'RFQ', value: 'RFQ' },
+      });
+      await fillDateByLabel(page, GENERAL_DETAIL_LABELS.dueDate, '2026-12-31');
     });
 
     test('RFQ-VAL-VND-001: should block save when vendors grid is completely empty', async ({

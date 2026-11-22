@@ -2,6 +2,7 @@
 export const RFQ_ITEM_GRID_COLUMNS = {
   itemName: 'itemName',
   makeName: 'makeName',
+  hsnCode: 'hsnCode',
   unitCode: 'unitCode',
   techSpecification: 'techSpecification',
   qty: 'qty',
