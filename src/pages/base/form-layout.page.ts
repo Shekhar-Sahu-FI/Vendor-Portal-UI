@@ -34,6 +34,10 @@ export class FormLayoutPage extends BasePage {
       .locator('div:has(.grid.grid-cols-7)')
       .waitFor({ state: 'hidden', timeout: 2_000 })
       .catch(() => {});
+    const alertBtn = this.page.locator('.z-alert-box button').first();
+    if (await alertBtn.isVisible().catch(() => false)) {
+      await alertBtn.click().catch(() => {});
+    }
   }
 
   async clickSave() {

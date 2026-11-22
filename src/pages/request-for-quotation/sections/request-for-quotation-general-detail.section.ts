@@ -1,6 +1,6 @@
 import { Page } from '@playwright/test';
 import { AutoSuggestField, SelectField } from '../../../types/purchase-order.types';
-import { GENERAL_DETAIL_LABELS as L } from '../request-for-quotation.constants';
+import { GENERAL_DETAIL_LABELS as L, RFQ_SOURCE_DOCUMENT_TYPE } from '../request-for-quotation.constants';
 import { fillTextField, getFieldContainer } from '../../../utils/field-accessor';
 import { fillDateByLabel } from '../../../utils/date-calendar.helper';
 import { FormFieldHelper } from '../../../utils/form-field.helper';
@@ -26,8 +26,14 @@ export class RequestForQuotationGeneralDetailSection {
   }
 
   async fillSourceDocumentTypeById(id: number) {
-    const select = getFieldContainer(this.page, L.sourceDocument).locator('select').first();
-    await select.selectOption({ value: String(id) });
+    const label = id === RFQ_SOURCE_DOCUMENT_TYPE.purchaseRequest ? 'Purchase Request' : 'Direct';
+    const container = getFieldContainer(this.page, L.sourceDocument);
+    const trigger = container.locator('button.uc-dropdown-trigger, button[aria-haspopup="listbox"], button').first();
+    const currentText = (await trigger.innerText().catch(() => ''))?.trim();
+    if (currentText.toLowerCase() === label.toLowerCase()) {
+      return;
+    }
+    await this.fillSourceDocumentType(label);
   }
 
   async fillDueDate(value: string) {
